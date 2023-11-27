@@ -13,14 +13,14 @@ struct Options {
     max_depth: usize,
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let options = Options::parse();
 
     for entry in WalkDir::new(".")
         .min_depth(options.min_depth)
         .max_depth(options.max_depth)
     {
-        let entry = entry.unwrap();
+        let entry = entry?;
         let path = entry.path();
         let formatted_entry = if path.is_file() {
             path.display().to_string().white()
@@ -31,8 +31,10 @@ fn main() {
             path.display().to_string().yellow()
         };
 
-        let size = ByteSize(entry.metadata().unwrap().len());
+        let size = ByteSize(entry.metadata()?.len());
 
         println!("{:>9}\t{:>15}", size, formatted_entry);
     }
+
+    Ok(())
 }
