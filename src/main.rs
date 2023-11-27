@@ -1,3 +1,4 @@
+use bytesize::ByteSize;
 use clap::Parser;
 use colored::Colorize;
 use walkdir::WalkDir;
@@ -30,8 +31,8 @@ fn main() {
             path.display().to_string().yellow()
         };
 
-        let size = entry.metadata().unwrap().len();
+        let size = ByteSize(entry.metadata().unwrap().len());
 
-        println!("{:>9} B\t{:>15}", size, formatted_entry);
+        println!("{:>9}\t{:>15}", size, formatted_entry);
     }
 }
