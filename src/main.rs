@@ -1,4 +1,4 @@
-use std::{fmt::Display, path::PathBuf};
+use std::{fmt::Display, fs::Metadata, path::PathBuf};
 
 use bytesize::ByteSize;
 use clap::Parser;
@@ -52,7 +52,7 @@ fn main() -> anyhow::Result<()> {
         .filter_entry(|entry| options.hidden || !is_hidden(entry))
     {
         let entry = entry?;
-        let size = FormatSize(&entry);
+        let size = FormatSize::try_from(&entry)?;
         let formatted_entry = FormatEntry(&entry);
         println!("{}\t{}", size, formatted_entry);
     }
@@ -77,10 +77,18 @@ impl<'walk_dir_loop> Display for FormatEntry<'walk_dir_loop> {
     }
 }
 
-struct FormatSize<'walk_dir_loop>(&'walk_dir_loop DirEntry);
+struct FormatSize(Metadata);
 
-impl<'walk_dir_loop> Display for FormatSize<'walk_dir_loop> {
+impl Display for FormatSize {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&format!("{:>9}", ByteSize(self.0.metadata().unwrap().len())).green())
+        f.write_str(&format!("{:>9}", ByteSize(self.0.len())).green())
+    }
+}
+
+impl<'walk_dir_loop> TryFrom<&'walk_dir_loop DirEntry> for FormatSize {
+    type Error = anyhow::Error;
+
+    fn try_from(entry: &DirEntry) -> Result<Self, Self::Error> {
+        Ok(Self(entry.metadata()?))
     }
 }
