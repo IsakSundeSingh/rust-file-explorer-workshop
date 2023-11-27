@@ -11,10 +11,23 @@ struct Options {
 
     #[arg(long, default_value_t = 1)]
     max_depth: usize,
+
+    #[arg(long, default_value_t = false)]
+    headers: bool,
 }
 
 fn main() -> anyhow::Result<()> {
     let options = Options::parse();
+
+    if options.headers {
+        println!(
+            "{:>5}{}\t{:>11}{}",
+            "",
+            "Size".bold().underline(),
+            "",
+            "Name".bold().underline()
+        );
+    }
 
     for entry in WalkDir::new(".")
         .min_depth(options.min_depth)
