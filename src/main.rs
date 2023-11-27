@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use bytesize::ByteSize;
 use clap::Parser;
 use colored::Colorize;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -19,6 +19,17 @@ struct Options {
 
     #[arg(long, default_value_t = false)]
     headers: bool,
+
+    #[arg(long, default_value_t = false)]
+    hidden: bool,
+}
+
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map(|s| s.starts_with('.'))
+        .unwrap_or(false)
 }
 
 fn main() -> anyhow::Result<()> {
@@ -37,6 +48,8 @@ fn main() -> anyhow::Result<()> {
     for entry in WalkDir::new(options.path.unwrap_or(".".into()))
         .min_depth(options.min_depth)
         .max_depth(options.max_depth)
+        .into_iter()
+        .filter_entry(|entry| options.hidden || !is_hidden(entry))
     {
         let entry = entry?;
         let path = entry.path();
