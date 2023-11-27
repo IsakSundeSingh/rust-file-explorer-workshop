@@ -1,3 +1,7 @@
+use walkdir::WalkDir;
+
 fn main() {
-    println!("Hello, world!");
+    for entry in WalkDir::new(".") {
+        println!("{}", entry.unwrap().path().display());
+    }
 }
