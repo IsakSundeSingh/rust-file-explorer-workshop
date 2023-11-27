@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use bytesize::ByteSize;
 use clap::Parser;
 use colored::Colorize;
@@ -6,6 +8,9 @@ use walkdir::WalkDir;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Options {
+    #[arg(short, long)]
+    path: Option<PathBuf>,
+
     #[arg(long, default_value_t = 1)]
     min_depth: usize,
 
@@ -29,7 +34,7 @@ fn main() -> anyhow::Result<()> {
         );
     }
 
-    for entry in WalkDir::new(".")
+    for entry in WalkDir::new(options.path.unwrap_or(".".into()))
         .min_depth(options.min_depth)
         .max_depth(options.max_depth)
     {
