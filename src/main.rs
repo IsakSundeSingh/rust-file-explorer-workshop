@@ -62,7 +62,7 @@ fn main() -> anyhow::Result<()> {
             path.display().to_string().yellow()
         };
 
-        let size = ByteSize(entry.metadata()?.len());
+        let size = format!("{}", ByteSize(entry.metadata()?.len())).green();
 
         println!("{:>9}\t{:>15}", size, formatted_entry);
     }
