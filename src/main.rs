@@ -30,6 +30,8 @@ fn main() {
             path.display().to_string().yellow()
         };
 
-        println!("{}", formatted_entry);
+        let size = entry.metadata().unwrap().len();
+
+        println!("{:>9} B\t{:>15}", size, formatted_entry);
     }
 }
