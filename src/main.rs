@@ -1,5 +1,6 @@
 use std::{fmt::Display, fs::Metadata, path::PathBuf};
 
+use anyhow::Context;
 use bytesize::ByteSize;
 use clap::Parser;
 use colored::Colorize;
@@ -51,8 +52,11 @@ fn main() -> anyhow::Result<()> {
         .into_iter()
         .filter_entry(|entry| options.hidden || !is_hidden(entry))
     {
-        let entry = entry?;
-        let size = FormatSize(entry.metadata()?);
+        let entry = entry.context("Error getting file entry")?;
+        let size = FormatSize(entry.metadata().context(format!(
+            "Failed extracting metadata for {}. Perhaps you are missing permissions?",
+            entry.path().display()
+        ))?);
         let formatted_entry = FormatEntry(&entry);
         println!("{}\t{}", size, formatted_entry);
     }
