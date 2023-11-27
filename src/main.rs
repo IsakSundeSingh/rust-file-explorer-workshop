@@ -52,7 +52,7 @@ fn main() -> anyhow::Result<()> {
         .filter_entry(|entry| options.hidden || !is_hidden(entry))
     {
         let entry = entry?;
-        let size = FormatSize::try_from(&entry)?;
+        let size = FormatSize(entry.metadata()?);
         let formatted_entry = FormatEntry(&entry);
         println!("{}\t{}", size, formatted_entry);
     }
@@ -82,13 +82,5 @@ struct FormatSize(Metadata);
 impl Display for FormatSize {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&format!("{:>9}", ByteSize(self.0.len())).green())
-    }
-}
-
-impl<'walk_dir_loop> TryFrom<&'walk_dir_loop DirEntry> for FormatSize {
-    type Error = anyhow::Error;
-
-    fn try_from(entry: &DirEntry) -> Result<Self, Self::Error> {
-        Ok(Self(entry.metadata()?))
     }
 }
