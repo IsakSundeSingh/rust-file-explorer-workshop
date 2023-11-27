@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Display, path::PathBuf};
 
 use bytesize::ByteSize;
 use clap::Parser;
@@ -52,7 +52,19 @@ fn main() -> anyhow::Result<()> {
         .filter_entry(|entry| options.hidden || !is_hidden(entry))
     {
         let entry = entry?;
-        let path = entry.path();
+        let size = format!("{}", ByteSize(entry.metadata()?.len())).green();
+        let formatted_entry = FormatEntry(&entry);
+        println!("{:>9}\t{}", size, formatted_entry);
+    }
+
+    Ok(())
+}
+
+struct FormatEntry<'walk_dir_loop>(&'walk_dir_loop DirEntry);
+
+impl<'walk_dir_loop> Display for FormatEntry<'walk_dir_loop> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let path = self.0.path();
         let formatted_entry = if path.is_file() {
             path.display().to_string().white()
         } else if path.is_dir() {
@@ -61,11 +73,6 @@ fn main() -> anyhow::Result<()> {
             // We'll assume symlinks
             path.display().to_string().yellow()
         };
-
-        let size = format!("{}", ByteSize(entry.metadata()?.len())).green();
-
-        println!("{:>9}\t{:>15}", size, formatted_entry);
+        f.write_fmt(format_args!("{formatted_entry:>15}"))
     }
-
-    Ok(())
 }
