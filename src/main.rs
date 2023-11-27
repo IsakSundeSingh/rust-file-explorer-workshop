@@ -1,4 +1,5 @@
 use clap::Parser;
+use colored::Colorize;
 use walkdir::WalkDir;
 
 #[derive(Parser, Debug)]
@@ -18,6 +19,17 @@ fn main() {
         .min_depth(options.min_depth)
         .max_depth(options.max_depth)
     {
-        println!("{}", entry.unwrap().path().display());
+        let entry = entry.unwrap();
+        let path = entry.path();
+        let formatted_entry = if path.is_file() {
+            path.display().to_string().white()
+        } else if path.is_dir() {
+            path.display().to_string().blue()
+        } else {
+            // We'll assume symlinks
+            path.display().to_string().yellow()
+        };
+
+        println!("{}", formatted_entry);
     }
 }
