@@ -52,9 +52,9 @@ fn main() -> anyhow::Result<()> {
         .filter_entry(|entry| options.hidden || !is_hidden(entry))
     {
         let entry = entry?;
-        let size = format!("{}", ByteSize(entry.metadata()?.len())).green();
+        let size = FormatSize(&entry);
         let formatted_entry = FormatEntry(&entry);
-        println!("{:>9}\t{}", size, formatted_entry);
+        println!("{}\t{}", size, formatted_entry);
     }
 
     Ok(())
@@ -74,5 +74,13 @@ impl<'walk_dir_loop> Display for FormatEntry<'walk_dir_loop> {
             path.display().to_string().yellow()
         };
         f.write_fmt(format_args!("{formatted_entry:>15}"))
+    }
+}
+
+struct FormatSize<'walk_dir_loop>(&'walk_dir_loop DirEntry);
+
+impl<'walk_dir_loop> Display for FormatSize<'walk_dir_loop> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{:>9}", ByteSize(self.0.metadata().unwrap().len())).green())
     }
 }
