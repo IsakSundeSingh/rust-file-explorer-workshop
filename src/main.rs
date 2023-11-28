@@ -79,7 +79,14 @@ impl<'walk_dir_loop> Display for FormatEntry<'walk_dir_loop> {
             // We'll assume symlinks
             name.yellow()
         };
-        f.write_fmt(format_args!("{formatted_entry:>15}"))
+
+        const INDENTATION_SEQUENCE: &str = "⤷ ";
+
+        let indent = INDENTATION_SEQUENCE
+            .repeat(self.0.depth().saturating_sub(1))
+            .dimmed();
+
+        f.write_fmt(format_args!("{indent}{formatted_entry}"))
     }
 }
 
