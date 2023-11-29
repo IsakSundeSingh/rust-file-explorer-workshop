@@ -32,7 +32,7 @@ Be explorative, use go to definition in your editor to see how code is implement
 
 We need to create our project before we start. Find a good name, or just use what I came up with: `explore`.
 
-🏆 Create a new Cargo project called `explore` using `cargo create`
+🏆 Create a new Cargo project called `explore` using `cargo new`
 
 <details>
 <summary> 🚨 Solution</summary>
