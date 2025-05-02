@@ -1005,14 +1005,14 @@ Instead of printing the entire path, let's pick out only the last element. We al
 ```rust
 let path = self.0.path();
 // SAFETY: We can safely unwrap here as we know the path contains at least one part (e.g. `.` or `./thing`, or so on)
-let name = path.iter().last().unwrap();
+let name = path.iter().next_back().unwrap();
 ```
 
 Unfortunately, because the standard library of Rust tries to be as cross-platform as possible, we get an opaque `&OsStr` back here. So this code fails to compile. The name may or may not be utf-8, which all Rust strings are and which colored requires. In our program I would say it is fair to assume we are working with files that can be displayed with utf-8. To do this, we can use [`OsStr::to_string_lossy`](https://doc.rust-lang.org/stable/std/ffi/struct.OsStr.html#method.to_string_lossy):
 
 ```rust
 // SAFETY: We can safely unwrap here as we know the path contains at least one part (e.g. `.` or `./thing`, or so on)
-let name = path.iter().last().unwrap().to_string_lossy();
+let name = path.iter().next_back().unwrap().to_string_lossy();
 // Use `name` instead of path in the coloring below:
 let formatted_entry = if path.is_file() {
     name.white()

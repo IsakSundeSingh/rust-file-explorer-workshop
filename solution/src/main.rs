@@ -90,11 +90,11 @@ fn main() -> anyhow::Result<()> {
 
 struct FormatEntry<'walk_dir_loop>(&'walk_dir_loop DirEntry);
 
-impl<'walk_dir_loop> Display for FormatEntry<'walk_dir_loop> {
+impl Display for FormatEntry<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let path = self.0.path();
         // SAFETY: We can safely unwrap here as we know the path contains at least one part (e.g. `.` or `./thing`, or so on)
-        let name = path.iter().last().unwrap().to_string_lossy();
+        let name = path.iter().next_back().unwrap().to_string_lossy();
         let formatted_entry = if path.is_file() {
             name.white()
         } else if path.is_dir() {
