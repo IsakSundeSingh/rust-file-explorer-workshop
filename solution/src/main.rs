@@ -126,12 +126,15 @@ struct FormatModifiedAt(SystemTime);
 
 impl Display for FormatModifiedAt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let date = chrono::DateTime::<chrono::Utc>::from(self.0);
+        use jiff::fmt::rfc2822::DateTimePrinter;
+        let date = jiff::Timestamp::try_from(self.0).expect("Could not parse system time");
         f.write_fmt(format_args!(
             "{}",
-            date.to_rfc2822()
+            DateTimePrinter::new()
+                .timestamp_to_string(&date)
+                .expect("Could not print timestamp")
+                .strip_suffix(" -0000")
                 // SAFETY: We know it is in UTC so the stripping always works, probably 🤠
-                .strip_suffix(" +0000")
                 .unwrap()
                 .blue()
         ))

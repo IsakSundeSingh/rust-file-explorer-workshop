@@ -1111,15 +1111,19 @@ f.write_fmt(format_args!("{indent}{formatted_entry}"))
 
 ### ⏰ 20. About time for a change!
 
-We don't know when files and folders are created! What kind of file explorer is that. Add the modified date of each file/folder and present it using [chrono](https://docs.rs/chrono/latest/chrono/). Rust has support for dates in the standard library, but doesn't support formatting them (trust me, with the amount of weird stuff going on with dates/timestamps and the stability promises of a standard library, this is really a good thing).
+We don't know when files and folders are created! What kind of file explorer is that. Add the modified date of each file/folder and present it using [jiff](https://docs.rs/jiff/latest/jiff/).
+
+Previously, this tutorial used [chrono](https://docs.rs/chrono/latest/chrono/) for date-handling, but I feel jiff has a more modern API.
+
+Rust has support for dates in the standard library, but doesn't support formatting them (trust me, with the amount of weird stuff going on with dates/timestamps and the stability promises of a standard library, this is really a good thing).
 
 1. 🏆 Add a flag for showing the date modified
 2. 🏆 Add a header if the flag is provided
-3. 🏆 Add chrono
-4. 🏆 Fetch the modified timestamp from the metadata, assume they are UTC, and format them using the RFC2822 format
+3. 🏆 Add jiff with the `alloc` flag enabled (`cargo add jiff -F alloc`)
+4. 🏆 Fetch the modified timestamp from the metadata, assume they are UTC, and _format_ them using the RFC2822 format
 
-💡 Tip: Perhaps chrono has some way of converting _from_ the time modified?
-💡 Tip: If you encounter a weird `+0000`, just _strip_ it away
+💡 Tip: Perhaps jiff has some way of converting _from_ the time modified?
+💡 Tip: If you encounter a weird `-0000`, just _strip_ it away
 
 <details>
 <summary>🚨 Solution 1</summary>
@@ -1168,7 +1172,7 @@ if options.headers {
 Same as before, run:
 
 ```shell
-> cargo add chrono
+> cargo add jiff
 ```
 
 </details>
@@ -1196,9 +1200,21 @@ impl Display for FormatModifiedAt {
 Replace the `todo!`-macro call with the following:
 
 ```rust
-let date = chrono::DateTime::<chrono::Utc>::from(self.0);
-f.write_fmt(format_args!("{}", date.to_rfc2822()))
+use jiff::fmt::rfc2822::DateTimePrinter;
+let date = jiff::Timestamp::try_from(self.0).expect("Could not parse system time");
+f.write_fmt(format_args!(
+    "{}",
+    DateTimePrinter::new()
+        .timestamp_to_string(&date)
+        .expect("Could not print timestamp")
+        .strip_suffix(" -0000")
+        // SAFETY: We know it is in UTC so the stripping always works, probably 🤠
+        .unwrap()
+        .blue()
+))
 ```
+
+The `.unwrap()`- and `.expect`-calls here are fine, as we don't really have any way to handle them for now, and since we are using the `Display`-trait we cannot change its signature to return another error.
 
 And in our main loop, let's extract the metadata as we use it more than one place and extract the modified at-date:
 
