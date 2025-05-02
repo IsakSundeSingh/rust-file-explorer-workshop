@@ -1,8 +1,8 @@
 use std::{fmt::Display, fs::Metadata, path::PathBuf, time::SystemTime};
 
-use anyhow::Context;
 use bytesize::ByteSize;
 use clap::Parser;
+use color_eyre::eyre::Context;
 use colored::Colorize;
 use walkdir::{DirEntry, WalkDir};
 
@@ -36,7 +36,8 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .unwrap_or(false)
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> color_eyre::Result<()> {
+    color_eyre::install()?;
     let options = Options::parse();
 
     if options.headers {

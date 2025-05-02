@@ -146,7 +146,7 @@ Run the following:
 ```shell
 > cargo add clap -F derive
     Updating crates.io index
-      Adding clap v4.4.8 to dependencies.
+      Adding clap v4.5.37 to dependencies
              Features:
              + color
              + derive
@@ -161,7 +161,10 @@ Run the following:
              - env
              - string
              - unicode
+             - unstable-derive-ui-tests
              - unstable-doc
+             - unstable-ext
+             - unstable-markdown
              - unstable-styles
              - unstable-v5
              - wrap_help
@@ -447,24 +450,24 @@ Our program may encounter errors a couple of places. Currently, we use `.unwrap(
 In the Rust ecosystem, users have collectively agreed over time on two rule of thumbs:
 
 1. If you're handling errors in a library, you should create your own error types and use [thiserror](https://docs.rs/thiserror/latest/thiserror/) to describe them in error reports.
-2. If you're writing an application-level program, you should use [anyhow](https://docs.rs/anyhow/latest/anyhow/). This let's you easily return errors from functions as long as they implement the [`std::error::Error`](https://doc.rust-lang.org/stable/std/error/trait.Error.html)-trait.
+2. If you're writing an application-level program, you should use [color_eyre](https://docs.rs/color_eyre/latest/color_eyre/). This let's you easily return errors from functions as long as they implement the [`std::error::Error`](https://doc.rust-lang.org/stable/std/error/trait.Error.html)-trait.
 
 As always with rules like these, there are exceptions.
 Another way to look at it is: are you supposed to be able to match and handle the error or are you going to just display it to a user?
 
-For now, we'll go the easy way out and use anyhow as we are creating an application and we want to just display the errors to the users.
+For now, we'll go the easy way out and use color_eyre as we are creating an application and we want to just display the errors to the users.
 
-🏆 Add anyhow and use the `anyhow::Result` as a return type (or just `Result<(), anyhow::Error` as the former is an alias for the latter)
+🏆 Add color_eyre and use the `color_eyre::Result` as a return type (or just `Result<(), color_eyre::Error>` as the former is an alias for the latter)
 
 💡 Tip: Instead of using `match` at every error, perhaps you could simplify things with [`?`](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator)?
 
 <details>
 <summary>🚨 Solution</summary>
 
-Add anyhow:
+Add color_eyre:
 
 ```shell
-> cargo add anyhow
+> cargo add color_eyre
 ```
 
 #### Info on the try-operator
@@ -493,10 +496,11 @@ fn thing(x: X) -> Result<(), Error> {
 
 #### Back to our code
 
-Change the return type of `main` to `anyhow::Result<()>` as we can simply return `()` ([unit](https://doc.rust-lang.org/stable/std/primitive.unit.html)) to denote nothing is returned in the OK-case.
+Change the return type of `main` to `color_eyre::Result<()>` as we can simply return `()` ([unit](https://doc.rust-lang.org/stable/std/primitive.unit.html)) to denote nothing is returned in the OK-case.
 
 ```rust
-fn main() -> anyhow::Result<()>
+fn main() -> color_eyre::Result<()> {
+    color_eyre::install()?;
 ```
 
 Replace our `.unwrap()`s with `?`:
@@ -917,7 +921,7 @@ let size = FormatSize::try_from(&entry)?;
 
 ```rust
 impl<'walk_dir_loop> TryFrom<&'walk_dir_loop DirEntry> for FormatSize {
-    type Error = anyhow::Error;
+    type Error = color_eyre::Report;
 
     fn try_from(entry: &DirEntry) -> Result<Self, Self::Error> {
         Ok(Self(entry.metadata()?))
@@ -925,7 +929,7 @@ impl<'walk_dir_loop> TryFrom<&'walk_dir_loop DirEntry> for FormatSize {
 }
 ```
 
-The `type Error = anyhow::Error;` here is an [associated type](https://doc.rust-lang.org/book/ch19-03-advanced-traits.html?highlight=associated%20type#specifying-placeholder-types-in-trait-definitions-with-associated-types). It sounds fancier than it is. In this case it is only so that `TryFrom` can reference `Self::Error` in the return type without knowing which error you are going to implement the trait for.
+The `type Error = color_eyre::Report;` here is an [associated type](https://doc.rust-lang.org/book/ch19-03-advanced-traits.html?highlight=associated%20type#specifying-placeholder-types-in-trait-definitions-with-associated-types). It sounds fancier than it is. In this case it is only so that `TryFrom` can reference `Self::Error` in the return type without knowing which error you are going to implement the trait for.
 
 Cool!
 
@@ -958,9 +962,9 @@ And remove the `impl TryFrom` item.
 
 ### 🧂 17. Spicing up our error-messages
 
-We've used anyhow for error-handling, but missed out on [contexts](https://docs.rs/anyhow/latest/anyhow/trait.Context.html)! Contexts give better contexts to errors for more easily figuring out why an error occurred.
+We've used color_eyre for error-handling, but missed out on [contexts](https://docs.rs/eyre/0.6.12/eyre/trait.WrapErr.html#tymethod.context)! Contexts give better contexts to errors for more easily figuring out why an error occurred.
 
-🏆 Use the `anyhow::Context::context`-method to add context to errors
+🏆 Use the `color_eyre::eyre::Context::context`-method to add context to errors (or `wrap_err`)
 
 💡 Remember that non-static trait-methods that have a receiver (e.g. `self`, `&self`, `&mut self`, and so on) can be called as a regular method: `error.context("this failed in the context of blah and blah")?`.
 
