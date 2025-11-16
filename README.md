@@ -606,7 +606,7 @@ Hey, I told you it ain't pretty, but it works.
 
 ### 😱 10. Not hardcoding the path
 
-We talked about not hardcoding things all the way back in assignment 4, but we've been harcoding our path since the beginning in `WalkDir::new(".")`!
+We talked about not hardcoding things all the way back in assignment 4, but we've been hardcoding our path since the beginning in `WalkDir::new(".")`!
 
 🏆 Add an argument `--path` which accepts a path to some directory and use that to list out entries, defaulting to `"."` if none is given.
 
