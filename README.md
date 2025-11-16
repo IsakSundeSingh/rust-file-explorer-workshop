@@ -7,7 +7,7 @@ This workshop expects some familiarity with Rust, and introduces some ecosystem 
 ## 🔤 Get going
 
 - Install rustup https://rustup.rs/
-- This workshop was made on Rust 1.72.0 but should work on some earlier versions as well
+- Minimum supported Rust version is 1.80.1, but newer versions works fine.
 
 ## Assignments
 
